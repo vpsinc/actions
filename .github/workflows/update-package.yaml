@@ -26,6 +26,9 @@ on:
       HEX_REPO_GHACTIONS_PASSWORD:
         description: Password for the Hex repository user
         required: true
+      HEX_TOKEN:
+        description: Personal access token to checkout the hex_git_repo
+        required: true
 
 jobs:
   build_package:
@@ -58,6 +61,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: ${{ inputs.hex_git_repo }}
+          token: ${{ secrets.HEX_TOKEN }}
           path: hex_repo
       - name: Add Hex repo to Mix
         run: |
