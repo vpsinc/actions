@@ -1,0 +1,81 @@
+---
+name: Update (or add) package to Hex repository
+on:
+  workflow_call:
+    inputs:
+      hex_repo_name:
+        description: Shortname for the Hex repository
+        type: string
+        required: true
+      hex_git_repo:
+        description: The GitHub repository to commit the package to. (Formatted as "org/repo".)
+        type: string
+        required: true
+      hex_domain:
+        description: Domain name of the deployed Hex repository
+        type: string
+        required: true
+      hex_port:
+        description: Port the Hex repository listens on
+        type: integer
+        required: true
+    secrets:
+      HEX_REPO_GHACTIONS_USER:
+        description: The HTTP Basic Auth user given access to the Hex repository
+        type: string
+        required: true
+      HEX_REPO_GHACTIONS_PASSWORD:
+        description: Password for the Hex repository user
+        type: string
+        required: true
+
+jobs:
+  build_package:
+    name: Build Package
+    runs-on: ubuntu-latest
+    env:
+      HEX_PRIVATE_KEY: ${{ secrets.HEX_PRIVATE_KEY }}
+    steps:
+      - name: Install BEAM
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: '24.1.6'
+          elixir-version: '1.13.3'
+      - name: Checkout lib
+        uses: actions/checkout@v3
+        with:
+          path: library
+      - name: Cache lib deps
+        uses: actions/cache@v3
+        env:
+          cache-name: mix-deps
+        with:
+          path: library/deps
+          key: ${{ runner.os }}-${{ github.repository }}-build-${{ env.cache-name }}-${{ hashFiles('library/**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ github.repository }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-${{ github.repository }}-build-
+            ${{ runner.os }}-${{ github.repository }}-
+      - name: Checkout Hex repo
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ inputs.hex_git_repo }}
+          path: hex_repo
+      - name: Add Hex repo to Mix
+        run: |
+          mix hex.repo add ${{ inputs.hex_repo_name }} \
+            https://${{ secrets.HEX_REPO_GHACTIONS_USER }}:${{ secrets.HEX_REPO_GHACTIONS_PASSWORD }}@${{ inputs.hex_domain }}:${{ inputs.hex_port }} \
+            --public-key=hex_repo/public/public_key
+      - name: Do build
+        run: |
+          cd library
+          OUT=${mix hex.build | tail -n 1 | cut -d ' ' -s -f 3}
+          mv $OUT ../hex_repo/public/tarball/
+      - name: Update repo
+        run: |
+          cd hex_repo
+          echo $HEX_PRIVATE_KEY > private_key.pem
+          mix hex.registry build public --name=cato --private-key=private_key.pem
+          git add public
+          git commit -m "Rebuilt registry"
+          git push
