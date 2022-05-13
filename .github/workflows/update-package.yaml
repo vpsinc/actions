@@ -77,7 +77,9 @@ jobs:
         run: |
           cd hex_repo
           echo $HEX_PRIVATE_KEY > private_key.pem
-          mix hex.registry build public --name=cato --private-key=private_key.pem
+          mix hex.registry build public --name=${{ inputs.hex_repo_name }} --private-key=private_key.pem
+          git config user.name github-actions
+          git config user.email github-actions@${{ inputs.hex_domain }}
           git add public
           git commit -m "Rebuilt registry"
           git push
