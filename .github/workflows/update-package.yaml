@@ -72,7 +72,7 @@ jobs:
         run: |
           cd library
           OUT=$(mix hex.build | tail -n 1 | cut -d ' ' -s -f 3)
-          mv $OUT ../hex_repo/public/tarball/
+          mv $OUT ${{ github.workspace }}/hex_repo/public/tarball/
       - name: Update repo
         run: |
           cd hex_repo
