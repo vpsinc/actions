@@ -17,16 +17,14 @@ on:
         required: true
       hex_port:
         description: Port the Hex repository listens on
-        type: integer
+        type: number
         required: true
     secrets:
       HEX_REPO_GHACTIONS_USER:
         description: The HTTP Basic Auth user given access to the Hex repository
-        type: string
         required: true
       HEX_REPO_GHACTIONS_PASSWORD:
         description: Password for the Hex repository user
-        type: string
         required: true
 
 jobs:
