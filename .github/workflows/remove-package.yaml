@@ -1,5 +1,5 @@
 ---
-name: Update (or add) package to Hex repository
+name: Remove a package from Hex repository
 on:
   workflow_call:
     inputs:
@@ -71,8 +71,8 @@ jobs:
             --public-key=hex_repo/public/public_key
       - name: Remove Old
         run: |
-        cd ${{github.workspace}}/hex_repo/public/tarballs/
-        rm ${{github.repository.name}}.{{$github.release.tag_name}}
+          cd ${{ github.workspace }}/hex_repo/public/tarballs/
+          rm ${{ github.repository.name }}.{{ $github.release.tag_name }}
       - name: Do build
         run: |
           cd library
