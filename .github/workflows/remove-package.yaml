@@ -74,7 +74,7 @@ jobs:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: |
           cd ${{ github.workspace }}/hex_repo/public/tarballs/
-          echo "$GITHUB_CONTEXT"
+          rm ${{ github.event.repository.name }}.${{ github.event.release.tag_name }}
       - name: Do build
         run: |
           cd library
