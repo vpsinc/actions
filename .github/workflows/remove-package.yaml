@@ -70,10 +70,11 @@ jobs:
             https://${{ secrets.HEX_REPO_GHACTIONS_USER }}:${{ secrets.HEX_REPO_GHACTIONS_PASSWORD }}@${{ inputs.hex_domain }}:${{ inputs.hex_port }} \
             --public-key=hex_repo/public/public_key
       - name: Remove Old
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
         run: |
           cd ${{ github.workspace }}/hex_repo/public/tarballs/
-          echo ${{ github.repository.name }}
-          echo ${{ github.release.tag_name }}
+          echo "$GITHUB_CONTEXT"
       - name: Do build
         run: |
           cd library
