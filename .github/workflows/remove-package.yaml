@@ -72,7 +72,7 @@ jobs:
       - name: Remove Old
         run: |
           cd ${{ github.workspace }}/hex_repo/public/tarballs/
-          rm ${{ github.repository.name }}.{{ $github.release.tag_name }}
+          rm ${{ github.repository.name }}.${{ $github.release.tag_name }}
       - name: Do build
         run: |
           cd library
